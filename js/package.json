@@ -1,0 +1,12 @@
+{
+  "name": "arduino",
+  "version": "0.0.1",
+  "dependencies": {
+    "johnny-five": ""
+  },
+  "engines": {
+    "node": "0.10.28",
+    "npm": "1.4.9"
+  }
+}
+
