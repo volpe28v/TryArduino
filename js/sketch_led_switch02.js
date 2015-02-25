@@ -9,6 +9,7 @@ board.on("ready", function() {
 
   var isTuneOn = false;
 
+  // タクトスイッチを押すたびに LED を ON/OFF するよ
   button.on("down", function() {
     isTuneOn = !isTuneOn;
     if (isTuneOn){
