@@ -47,3 +47,20 @@ void Led::fade(void)
 
   analogWrite(this->pin, this->fadeIndex);
 }
+
+void Led::fadeIn(){
+  this->fadeIndex++;
+  if (this->fadeIndex >= 256){
+    this->fadeIndex = 255;
+  }
+  analogWrite(this->pin, this->fadeIndex);
+}
+
+void Led::fadeOut(){
+  this->fadeIndex--;
+  if (this->fadeIndex < 0){
+    this->fadeIndex = 0;
+  }
+  analogWrite(this->pin, this->fadeIndex);
+}
+

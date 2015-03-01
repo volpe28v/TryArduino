@@ -14,6 +14,8 @@ public:
   void off();
   void initFade(FadeMode mode);
   void fade();
+  void fadeIn();
+  void fadeOut();
 
 private:
   int pin;
