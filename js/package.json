@@ -2,7 +2,8 @@
   "name": "arduino",
   "version": "0.0.1",
   "dependencies": {
-    "johnny-five": ""
+    "johnny-five": "",
+    "socket.io-client": ""
   },
   "engines": {
     "node": "0.10.28",
