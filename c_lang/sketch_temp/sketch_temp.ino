@@ -5,10 +5,11 @@ float val1 = 0;
 float temp = 0;
 
 Led* led2 = new Led(9);
+const int BUTTON = 7;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9800);
+  Serial.begin(115200);
 }
 
 void loop() {  

@@ -11,6 +11,7 @@
     "feedparser": "~0.17.0",
     "request": "~2.36.0",
     "q": "~1.0.1",
+    "serialport": "",
     "moment": "2.6.0"
   }
 }

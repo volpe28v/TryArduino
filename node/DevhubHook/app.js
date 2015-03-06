@@ -7,6 +7,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var moment = require('moment');
+var serialport = require('serialport');
 
 var app = express();
 
@@ -35,7 +36,7 @@ function postData(name, msg, avatar){
   if (avatar != undefined){
     url = url + "&avatar=" + escape(avatar);
   }
-	http.get(url, function(){});
+	http.get(url, function(){ console.log(url);});
 }
 
 function postDataToMemo(name, msg){
@@ -111,6 +112,34 @@ app.post('/github', function(req, res){
 	res.json({});
 });
 
+var portName = "/dev/cu.usbmodem1411";
+var sp = new serialport.SerialPort(portName, {
+    baudRate: 115200,
+    dataBits: 8,
+    parity: 'none',
+    stopBits: 1,
+    flowControl: false,
+    parser: serialport.parsers.readline("\n")
+});
+
+sp.on('data', function(input) {
+  var buffer = new Buffer(input, 'utf8');
+  console.log(buffer);
+
+  var jsonData;
+  try {
+    jsonData = JSON.parse(buffer);
+    postData("arduino", jsonData.msg);
+    console.log('serial: ' + jsonData.msg);
+  } catch(e) {
+
+    console.log(e);
+    // データ受信がおかしい場合無視する
+    return;
+  }
+});
+
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+

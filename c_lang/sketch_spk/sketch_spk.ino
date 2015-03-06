@@ -112,16 +112,22 @@ Sound sounds[] = {
 //{NOTE_C4, 800},
 };
 int soundCount = sizeof(sounds)/sizeof(Sound);
+int switchCount = 0;
 
 void setup() {
   // put your setup code here, to run once:
   pinMode(BUTTON, INPUT);
   pinMode(SPEAKER, OUTPUT);
+  
+  Serial.begin(115200);
 }
 
 void loop() {
   // ボタン押してる間にサウンドが鳴る
   if (digitalRead(BUTTON) == HIGH){  
+    
+    sendSerial(++switchCount);
+    
     int i = 0;
     for (i = 0; i < soundCount; i++){
       tone(SPEAKER, sounds[i].note);
@@ -129,4 +135,17 @@ void loop() {
     }
     noTone(SPEAKER);
   }
+}
+
+char trans[50];
+void sendSerial(int val){
+  
+  // シリアルからのデータ送信
+  memset(trans, 0, 50);
+  char *json = &trans[0];
+
+  // 送信用のJSONデータの作成
+  sprintf(json, "{\"msg\":\"pushed Switch! %d counts.\" }",val);
+//  sprintf(json, "{\"msg\": %d }",val);
+  Serial.println(json);
 }
