@@ -9,7 +9,7 @@
 TFT TFTscreen = TFT(cs, dc, rst);
 int val0 = 0;
 
-Led* led2 = new Led(9);
+Led* led = new Led(4);
 const int BUTTON = 7;
 
 void setup() {
@@ -32,7 +32,10 @@ void setup() {
 int preStatus = LOW;
 long int nowTime = 0;
 long int limitTime = 60000 * 60 * 1;
+long int lcdOnTime = 10000;
+long int lcdNowTime = 0;
 int delayInterval = 100;
+
 void loop() {  
   // 温度を取得し計算する
   int nowStatus = digitalRead(BUTTON);
@@ -46,6 +49,21 @@ void loop() {
     sendTemp();
   }else{
     nowTime += delayInterval;
+  }
+  
+  if (Serial.available() > 0){
+    while(Serial.read() >= 0){
+      // 受信データを捨てる      
+    }
+    led->on();
+    lcdNowTime = 0;
+  }else{
+    if (lcdNowTime > lcdOnTime){     
+      led->off();
+      lcdNowTime = 0;
+    }else{
+      lcdNowTime += delayInterval;
+    }
   }
   delay(delayInterval);
 //  sendSerial(limitTime);
