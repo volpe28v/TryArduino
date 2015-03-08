@@ -6,6 +6,8 @@
 #define dc   9
 #define rst  8 
 
+#define LCDBUFF 256
+
 TFT TFTscreen = TFT(cs, dc, rst);
 int val0 = 0;
 
@@ -55,18 +57,20 @@ void loop() {
   }
   
   if (Serial.available() > 0){
+    delay(100); //データ受信しきるまで待つ
     char command = Serial.read();
     if (command == 't'){
       sendTemp();    
+      Serial.flush();
     }else{
-      char msgBuff[20]; 
-      memset(msgBuff,0,20);
+      char msgBuff[LCDBUFF]; 
+      memset(msgBuff,0,LCDBUFF);
       int i = 0;
       char readByte;
       while(( readByte = Serial.read()) > 0){
         msgBuff[i++] = readByte;
+        if (i > LCDBUFF) { break; }
       }
-      
       showMsgLCD(msgBuff);
     }
     led->on();
@@ -114,7 +118,7 @@ void showLCD(long int val){
   TFTscreen.text(lcdBuffer, 20, 30);
 }
 
-char lcdMsgBuffer[1024] = "\0";
+char lcdMsgBuffer[LCDBUFF] = "\0";
 void showMsgLCD(char * msg){
   TFTscreen.setTextSize(1);
   TFTscreen.stroke(0,0,0);

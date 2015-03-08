@@ -55,11 +55,12 @@ socket.on('message', function(data){
   if (data.msg.match(/arduino/i)){
     command = "t";
   }else{
-    command = " " + data.msg;
+    command = "m" + data.msg;
   }
 
   sp.write(command, function(err, bytes) {
     console.log('bytes written: ', bytes);
+    console.log(command);
   });
 });
 socket.on('disconnect', function(){});
