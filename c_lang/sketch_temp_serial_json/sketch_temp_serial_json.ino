@@ -12,6 +12,14 @@ int val0 = 0;
 Led* led = new Led(4);
 const int BUTTON = 7;
 
+int preStatus = LOW;
+
+long int nextTempTime;
+long int tempInterval = 60000 * 60 * 2;
+
+long int nextLcdTime;
+long int lcdInterval = 1000;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -22,19 +30,16 @@ void setup() {
    
   TFTscreen.stroke(255,255,255);
   TFTscreen.setTextSize(2);
-  TFTscreen.text("Temp :\n ",0,0);
+  TFTscreen.text("Temp:\n ",10,4);
  
-  TFTscreen.setTextSize(6);
+  TFTscreen.setTextSize(5);
   
   sendTemp();
+  
+  nextTempTime = millis() + tempInterval;
+  nextLcdTime = millis() + lcdInterval;
 }
 
-int preStatus = LOW;
-long int nowTime = 0;
-long int limitTime = 60000 * 60 * 3;
-long int lcdOnTime = 10000;
-long int lcdNowTime = 0;
-int delayInterval = 100;
 
 void loop() {  
   // 温度を取得し計算する
@@ -44,30 +49,34 @@ void loop() {
   }
   preStatus = nowStatus;
   
-  if (nowTime > limitTime){
-    nowTime = 0;
+  if (nextTempTime < millis()){
+    nextTempTime += tempInterval;
     sendTemp();
-  }else{
-    nowTime += delayInterval;
   }
   
   if (Serial.available() > 0){
     char command = Serial.read();
     if (command == 't'){
       sendTemp();    
+    }else{
+      char msgBuff[20]; 
+      memset(msgBuff,0,20);
+      int i = 0;
+      char readByte;
+      while(( readByte = Serial.read()) > 0){
+        msgBuff[i++] = readByte;
+      }
+      
+      showMsgLCD(msgBuff);
     }
     led->on();
-    lcdNowTime = 0;
+    nextLcdTime = millis() + lcdInterval;
   }else{
-    if (lcdNowTime > lcdOnTime){     
+    if (nextLcdTime < millis()){     
       led->off();
-      lcdNowTime = 0;
-    }else{
-      lcdNowTime += delayInterval;
+      nextLcdTime = 0;
     }
   }
-  delay(delayInterval);
-//  sendSerial(limitTime);
 }
 
 float temp = 0;
@@ -93,6 +102,7 @@ void sendSerial(long int val){
 
 char lcdBuffer[20];
 void showLCD(long int val){
+  TFTscreen.setTextSize(5);
   TFTscreen.stroke(0,0,0);
   TFTscreen.text(lcdBuffer, 20, 30);
 
@@ -103,3 +113,18 @@ void showLCD(long int val){
   // print the sensor value
   TFTscreen.text(lcdBuffer, 20, 30);
 }
+
+char lcdMsgBuffer[1024] = "\0";
+void showMsgLCD(char * msg){
+  TFTscreen.setTextSize(1);
+  TFTscreen.stroke(0,0,0);
+  TFTscreen.text(lcdMsgBuffer, 20, 80);
+
+  strcpy(lcdMsgBuffer, msg);
+
+  // set the font color
+  TFTscreen.stroke(0,0,255);
+  // print the sensor value
+  TFTscreen.text(lcdMsgBuffer, 20, 80);
+}
+
