@@ -51,8 +51,13 @@ socket.on('connect', function(){
 });
 
 socket.on('message', function(data){
-  sp.write('message', function(err, bytesWritten) {
-    console.log('bytes written: ', bytesWritten);
+  var command = "m";
+  if (data.msg.match(/arduino/i)){
+    command = "t";
+  }
+
+  sp.write(command, function(err, bytes) {
+    console.log('bytes written: ', bytes);
   });
 });
 socket.on('disconnect', function(){});

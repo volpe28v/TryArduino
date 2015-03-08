@@ -31,7 +31,7 @@ void setup() {
 
 int preStatus = LOW;
 long int nowTime = 0;
-long int limitTime = 60000 * 60 * 1;
+long int limitTime = 60000 * 60 * 3;
 long int lcdOnTime = 10000;
 long int lcdNowTime = 0;
 int delayInterval = 100;
@@ -52,8 +52,9 @@ void loop() {
   }
   
   if (Serial.available() > 0){
-    while(Serial.read() >= 0){
-      // 受信データを捨てる      
+    char command = Serial.read();
+    if (command == 't'){
+      sendTemp();    
     }
     led->on();
     lcdNowTime = 0;
