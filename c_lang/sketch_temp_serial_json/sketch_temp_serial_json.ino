@@ -36,7 +36,7 @@ void setup() {
  
   TFTscreen.setTextSize(5);
   
-  sendTemp();
+  sendSensorValue();
   
   nextTempTime = millis() + tempInterval;
   nextLcdTime = millis() + lcdInterval;
@@ -47,20 +47,20 @@ void loop() {
   // 温度を取得し計算する
   int nowStatus = digitalRead(BUTTON);
   if (nowStatus == HIGH && preStatus == LOW){
-    sendTemp();
+    sendSensorValue();
   }
   preStatus = nowStatus;
   
   if (nextTempTime < millis()){
     nextTempTime += tempInterval;
-    sendTemp();
+    sendSensorValue();
   }
   
   if (Serial.available() > 0){
     delay(100); //データ受信しきるまで待つ
     char command = Serial.read();
     if (command == 't'){
-      sendTemp();    
+      sendSensorValue();    
       Serial.flush();
     }else{
       char msgBuff[LCDBUFF]; 
@@ -84,51 +84,69 @@ void loop() {
 }
 
 float temp = 0;
-float val1 = 0;
-void sendTemp(){
-  val1 = analogRead(1);
-  temp = ((5*val1) / 1024) * 100;
+float temp_val = 0;
+int light = 0;
+void sendSensorValue(){
+  temp_val = analogRead(1);
+  temp = ((5*temp_val) / 1024) * 100;
   
-  sendSerial(temp);  
-  showLCD(temp);
+  light = analogRead(3);  
+  
+  sendSerial(temp, light);  
+  showTempToLCD(temp);
+  showLightToLCD(light);
 }
 
 char trans[50];
-void sendSerial(long int val){
+void sendSerial(long int temp, long int light){
     // シリアルからのデータ送信
   memset(trans, 0, 50);
   char *json = &trans[0];
 
   // 送信用のJSONデータの作成
-  sprintf(json, "{\"msg\": \"Temp %ld.\" }",val);
+  sprintf(json, "{\"msg\": \"Temp %ld. Light %ld\" }",temp, light);
   Serial.println(json);
 }
 
-char lcdBuffer[20];
-void showLCD(long int val){
+char lcdTempBuffer[20];
+void showTempToLCD(long int temp){
   TFTscreen.setTextSize(5);
   TFTscreen.stroke(0,0,0);
-  TFTscreen.text(lcdBuffer, 20, 30);
+  TFTscreen.text(lcdTempBuffer, 20, 30);
 
-  sprintf(lcdBuffer, "%ldC",val);
+  sprintf(lcdTempBuffer, "%ldC",temp);
 
   // set the font color
   TFTscreen.stroke(0,255,0);
   // print the sensor value
-  TFTscreen.text(lcdBuffer, 20, 30);
+  TFTscreen.text(lcdTempBuffer, 20, 30);
+}
+
+char lcdLightBuffer[20];
+void showLightToLCD(long int light){
+  TFTscreen.setTextSize(2);
+  TFTscreen.stroke(0,0,0);
+  TFTscreen.text(lcdLightBuffer, 20, 80);
+
+  sprintf(lcdLightBuffer, "Light: %ld",light);
+
+  // set the font color
+  TFTscreen.stroke(255,0,0);
+  // print the sensor value
+  TFTscreen.text(lcdLightBuffer, 20, 80);
 }
 
 char lcdMsgBuffer[LCDBUFF] = "\0";
 void showMsgLCD(char * msg){
   TFTscreen.setTextSize(1);
   TFTscreen.stroke(0,0,0);
-  TFTscreen.text(lcdMsgBuffer, 20, 80);
+  TFTscreen.text(lcdMsgBuffer, 20, 110);
 
   strcpy(lcdMsgBuffer, msg);
 
   // set the font color
   TFTscreen.stroke(0,0,255);
   // print the sensor value
-  TFTscreen.text(lcdMsgBuffer, 20, 80);
+  TFTscreen.text(lcdMsgBuffer, 20, 110);
 }
 
