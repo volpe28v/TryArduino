@@ -14,9 +14,7 @@ var app = express();
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('devhub', process.env.DEVHUB);
-app.set('memo_no', process.env.NO);
-app.set('memo_line', process.env.LINE);
-app.set('server_host', process.env.SERVER_HOST);
+app.set('room_id', process.env.ROOM_ID || 1);
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -43,11 +41,12 @@ var sp = new serialport.SerialPort(portName, {
 
 var io = require('socket.io-client');
 var url = app.get('devhub');
+var name = 'Arduino';
 
 var socket = io.connect(url);
 socket.on('connect', function(){
   console.log("connect: " + app.get('devhub'));
-  socket.emit('name', {name: 'Arduino'});
+  socket.emit('name', {name: name});
 });
 
 socket.on('message', function(data){
@@ -72,8 +71,8 @@ sp.on('data', function(input) {
   var jsonData;
   try {
     jsonData = JSON.parse(buffer);
-    socket.emit('message',{name:'Arduino',msg: jsonData.msg});
-    console.log('serial: ' + jsonData.msg);
+    socket.emit('message',{name:name, room_id: app.get('room_id'), msg: 'volpeさんの部屋の温度は ' + jsonData.temp + ' 度です。'});
+    console.log('serial: ' + jsonData.temp);
   } catch(e) {
 
     console.log(e);

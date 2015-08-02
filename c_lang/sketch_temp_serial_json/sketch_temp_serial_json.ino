@@ -17,7 +17,7 @@ const int BUTTON = 7;
 int preStatus = LOW;
 
 long int nextTempTime;
-long int tempInterval = 60000 * 60 * 2;
+long int tempInterval = 60000 * 60;
 
 long int nextLcdTime;
 long int lcdInterval = 1000;
@@ -83,18 +83,18 @@ void loop() {
   }
 }
 
-float temp = 0;
+int temp = 0;
 float temp_val = 0;
 int light = 0;
 void sendSensorValue(){
   temp_val = analogRead(1);
   temp = ((5*temp_val) / 1024) * 100;
+       
+//  light = analogRead(3);  
   
-  light = analogRead(3);  
-  
-  sendSerial(temp, light);  
+  sendTempSerial(temp);  
   showTempToLCD(temp);
-  showLightToLCD(light);
+//  showLightToLCD(light);
 }
 
 char trans[50];
@@ -108,13 +108,23 @@ void sendSerial(long int temp, long int light){
   Serial.println(json);
 }
 
+void sendTempSerial(int temp){
+    // シリアルからのデータ送信
+  memset(trans, 0, 50);
+  char *json = &trans[0];
+
+  // 送信用のJSONデータの作成
+  sprintf(json, "{\"temp\": \"%d\" }",temp);
+  Serial.println(json);
+}
+
 char lcdTempBuffer[20];
-void showTempToLCD(long int temp){
+void showTempToLCD(int temp){
   TFTscreen.setTextSize(5);
   TFTscreen.stroke(0,0,0);
   TFTscreen.text(lcdTempBuffer, 20, 30);
 
-  sprintf(lcdTempBuffer, "%ldC",temp);
+  sprintf(lcdTempBuffer, "%dC",temp);
 
   // set the font color
   TFTscreen.stroke(0,255,0);
